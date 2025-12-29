@@ -19,10 +19,12 @@ app.get("/sheet", async (req, res) => {
   try {
     const checklist = await pool.query("SELECT * FROM checklist");
     const delegation = await pool.query("SELECT * FROM delegation");
+    const users = await pool.query("SELECT * FROM users");   // ⬅️ NEW
 
     res.json({
       checklist: checklist.rows,
-      delegation: delegation.rows
+      delegation: delegation.rows,
+      users: users.rows        // ⬅️ NEW
     });
   } catch (err) {
     res.status(500).send(err.toString());
