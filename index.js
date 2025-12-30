@@ -15,18 +15,52 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+// ---------- DATE FORMAT FUNCTION ----------
+function formatDate(date) {
+  if (!date) return null;
+
+  const d = new Date(date);
+
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+}
+
+// ---------- APPLY FORMAT TO ALL ROWS ----------
+function formatDatesInRows(rows) {
+  return rows.map(row => {
+    const formatted = {};
+    for (let key in row) {
+      if (row[key] instanceof Date) {
+        formatted[key] = formatDate(row[key]);
+      } else {
+        formatted[key] = row[key];
+      }
+    }
+    return formatted;
+  });
+}
+
+// ---------- API ----------
 app.get("/sheet", async (req, res) => {
   try {
     const checklist = await pool.query("SELECT * FROM checklist");
     const delegation = await pool.query("SELECT * FROM delegation");
-    const users = await pool.query("SELECT * FROM users");   // ⬅️ NEW
+    const users = await pool.query("SELECT * FROM users");
 
     res.json({
-      checklist: checklist.rows,
-      delegation: delegation.rows,
-      users: users.rows        // ⬅️ NEW
+      checklist: formatDatesInRows(checklist.rows),
+      delegation: formatDatesInRows(delegation.rows),
+      users: formatDatesInRows(users.rows)
     });
+
   } catch (err) {
+    console.error(err);
     res.status(500).send(err.toString());
   }
 });
