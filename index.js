@@ -52,11 +52,13 @@ app.get("/sheet", async (req, res) => {
     const checklist = await pool.query("SELECT * FROM checklist");
     const delegation = await pool.query("SELECT * FROM delegation");
     const users = await pool.query("SELECT * FROM users");
+    const holiday_list = await pool.query("SELECT * FROM holiday_list");
 
     res.json({
       checklist: formatDatesInRows(checklist.rows),
       delegation: formatDatesInRows(delegation.rows),
-      users: formatDatesInRows(users.rows)
+      users: formatDatesInRows(users.rows),
+      holiday_list: formatDatesInRows(holiday_list.rows) // 👈 AND THIS
     });
 
   } catch (err) {
