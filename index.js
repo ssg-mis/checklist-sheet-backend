@@ -80,7 +80,8 @@ ORDER BY task_id
     const holiday_list = await pool.query("SELECT * FROM holiday_list");
 
     res.json({
-      checklist: formatDatesInRows(checklist),
+      // checklist: formatDatesInRows(checklist),
+      checklist: formatDatesInRows(checklist.rows),
       delegation: formatDatesInRows(delegation.rows),
       users: formatDatesInRows(users.rows),
       holiday_list: formatDatesInRows(holiday_list.rows)
