@@ -49,7 +49,11 @@ function formatDatesInRows(rows) {
 // ---------- API ----------
 app.get("/sheet", async (req, res) => {
   try {
-    const checklist = await pool.query("SELECT * FROM checklist");
+    // const checklist = await pool.query("SELECT * FROM checklist");
+    const checklist = await pool.query(`
+  SELECT (to_jsonb(checklist) - 'image') AS data
+  FROM checklist
+`);
     const delegation = await pool.query("SELECT * FROM delegation");
     const users = await pool.query("SELECT * FROM users");
     const holiday_list = await pool.query("SELECT * FROM holiday_list");
