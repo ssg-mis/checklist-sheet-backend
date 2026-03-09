@@ -15,7 +15,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// ---------- DATE FORMAT FUNCTION ----------
+// ---------- DATE FORMAT ----------
 function formatDate(date) {
   if (!date) return null;
 
@@ -31,10 +31,11 @@ function formatDate(date) {
   return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
 }
 
-// ---------- APPLY FORMAT TO ALL ROWS ----------
+// ---------- APPLY FORMAT ----------
 function formatDatesInRows(rows) {
   return rows.map(row => {
     const formatted = {};
+
     for (let key in row) {
       if (row[key] instanceof Date) {
         formatted[key] = formatDate(row[key]);
@@ -42,6 +43,7 @@ function formatDatesInRows(rows) {
         formatted[key] = row[key];
       }
     }
+
     return formatted;
   });
 }
@@ -49,20 +51,24 @@ function formatDatesInRows(rows) {
 // ---------- API ----------
 app.get("/sheet", async (req, res) => {
   try {
-    // const checklist = await pool.query("SELECT * FROM checklist");
-    const checklist = await pool.query(`
-  SELECT (to_jsonb(checklist) - 'image') AS data
-  FROM checklist
-`);
+
+    // 👇 Remove ONLY image column automatically
+    const checklistQuery = await pool.query(`
+      SELECT (to_jsonb(checklist) - 'image') AS data
+      FROM checklist
+    `);
+
+    const checklist = checklistQuery.rows.map(r => r.data);
+
     const delegation = await pool.query("SELECT * FROM delegation");
     const users = await pool.query("SELECT * FROM users");
     const holiday_list = await pool.query("SELECT * FROM holiday_list");
 
     res.json({
-      checklist: formatDatesInRows(checklist.rows),
+      checklist: formatDatesInRows(checklist),
       delegation: formatDatesInRows(delegation.rows),
       users: formatDatesInRows(users.rows),
-      holiday_list: formatDatesInRows(holiday_list.rows) // 👈 AND THIS
+      holiday_list: formatDatesInRows(holiday_list.rows)
     });
 
   } catch (err) {
