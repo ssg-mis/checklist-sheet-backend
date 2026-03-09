@@ -53,12 +53,27 @@ app.get("/sheet", async (req, res) => {
   try {
 
     // 👇 Remove ONLY image column automatically
-    const checklistQuery = await pool.query(`
-      SELECT (to_jsonb(checklist) - 'image') AS data
-      FROM checklist
-    `);
-
-    const checklist = checklistQuery.rows.map(r => r.data);
+    const checklist = await pool.query(`
+SELECT 
+task_id,
+department,
+given_by,
+name,
+task_description,
+enable_reminder,
+require_attachment,
+frequency,
+remark,
+status,
+admin_done,
+delay,
+planned_date,
+created_at,
+task_start_date,
+submission_date
+FROM checklist
+ORDER BY task_id
+`);
 
     const delegation = await pool.query("SELECT * FROM delegation");
     const users = await pool.query("SELECT * FROM users");
